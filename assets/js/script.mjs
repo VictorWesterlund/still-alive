@@ -1,4 +1,4 @@
-import { default as Player } from "./modules/WindowManager.mjs";
+import { default as Player } from "./modules/PlayerManager.mjs";
 
 const play = document.getElementById("play");
 const message = document.getElementById("message");

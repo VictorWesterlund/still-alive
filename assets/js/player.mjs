@@ -51,10 +51,11 @@ class StillAlivePlayer {
 	message(event) {
 		const type = event.data[0];
 		const data = event.data[1];
+		console.log(event);
 
 		switch(type) {
 			case "LINE_FEED": this.lineFeed(); break;
-			case "CHAR_FEED": this.textFeed(data); break;
+			case "TEXT_FEED": this.textFeed(data); break;
 			case "DRAW_ART": this.drawArt(data); break;
 			case "BLANK": this.blank(); break;
 		}

@@ -1,63 +1,5 @@
+import { default as PlayerWindow } from "./PlayerWindow.mjs";
 import { default as Monkeydo } from "./monkeydo/Monkeydo.mjs";
-
-const windowPositions = {
-	"#lyrics": {
-		width: window.innerWidth / 2,
-		height: window.innerHeight,
-		top: 0,
-		left: 0
-	},
-	"#credits": {
-		width: window.innerWidth / 2,
-		height: window.innerHeight / 2,
-		top: 0,
-		left: window.innerWidth / 2
-	},
-	"#art": {
-		width: window.innerWidth / 2,
-		height: window.innerHeight / 2,
-		top: window.innerHeight / 2,
-		left: window.innerWidth / 2
-	}
-}
-
-class PlayerWindow {
-	constructor(name) {
-		this.features = {
-			menubar: false,
-			location: false,
-			resizable: false,
-			scrollbar: false,
-			status: false
-		}
-
-		this.url = new URL(window.location.href + "player");
-		this.url.hash = name;
-
-		Object.assign(this.features,windowPositions[this.url.hash]);
-	}
-
-	windowFeatures() {
-		let output = [];
-		for(let [key,value] of Object.entries(this.features)) {
-			if(typeof key === "boolean") {
-				value = value ? "yes" : "no";
-			}
-			output.push(`${key}=${value}`);
-		}
-		return output.join(",");
-	}
-
-	open() {
-		const features = this.windowFeatures();
-		const open = window.open(this.url.toString(),this.url.hash,features);
-
-		if(!open) {
-			const channel = new BroadcastChannel(this.url.hash);
-			channel.postMessage(["WINDOW_ERROR",[this.url.hash,"BLOCKED"]]);
-		}
-	}
-}
 
 export default class WindowManager {
 	constructor() {
@@ -65,23 +7,30 @@ export default class WindowManager {
 
 		// Bi-directional communcation to player windows
 		this.channels = {
-			lyrics: new BroadcastChannel("#lyrics"),
-			credits: new BroadcastChannel("#credits"),
-			art: new BroadcastChannel("#art")
+			"#lyrics": new BroadcastChannel("#lyrics"),
+			"#credits": new BroadcastChannel("#credits"),
+			"#art": new BroadcastChannel("#art")
 		};
 
 		// Monkeydo methods
 		const methods = {
 			self: self,
-			pushText: (target,text) => {
-				const channels = self.channels[target];
-				for(const channel of channels) {
-					channel.postMessage(["PUSH_TEXT",text]);
-				}
+			blank: (target) => {
+				self.channels[target].postMessage(["BLANK",target]);
+			},
+			lineFeed: (target) => {
+				self.channels[target].postMessage(["LINE_FEED"]);
+			},
+			textFeed: (text,target = "#lyrics") => {
+				self.channels[target].postMessage(["TEXT_FEED",text]);
+			},
+			drawArt: (index,target = "#art") => {
+				self.channels[target].postMessage(["DRAW_ART",index]);
 			}
 		}
 
 		this.player = new Monkeydo(methods);
+		this.player.loop(-1);
 	}
 
 	playbackFailed(promiseObject = false) {
@@ -115,9 +64,9 @@ export default class WindowManager {
 
 	// Open player windows and start playback
 	async play() {
-		const art = this.spawnPlayer("art");
-		const credits = this.spawnPlayer("credits");
-		const lyrics = this.spawnPlayer("lyrics");
+		const art = this.spawnPlayer("#art");
+		const credits = this.spawnPlayer("#credits");
+		const lyrics = this.spawnPlayer("#lyrics");
 		
 		const timeout = new Promise(resolve => setTimeout(() => resolve("TIMEOUT")),3000);
 		const windows = await Promise.allSettled([lyrics,credits,art]);
@@ -130,6 +79,10 @@ export default class WindowManager {
 					this.playbackFailed(promiseObject);
 				}
 			});
+
+			// Load Monkeydo manifest and start playback
+			const manifest = new URL(window.location.href + "monkeydo.json");
+			this.player.load(manifest.toString()).then(() => this.player.do());
 		});
 	}
 }

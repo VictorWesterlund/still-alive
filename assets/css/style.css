@@ -1,7 +1,7 @@
 :root {
 	--color-background: 0,0,0;
 	--color-contrast: 255,255,255;
-	--color-accent: 170,130,40;
+	--color-accent: 255,212,0;
 }
 
 html,
@@ -28,21 +28,6 @@ a {
 	color: rgba(var(--color-background));
 	padding: 20px;
 	font-size: 18px;
-}
-
-#player pre,
-#player p {
-	font-size: clamp(3vh,2vh,2vw);
-	color: rgb(var(--color-accent));
-}
-
-#player p:last-child::after {
-	content: "_";
-	animation: blink 500ms alternate infinite;
-}
-
-@keyframes blink {
-	to { opacity: 0; }
 }
 
 footer {

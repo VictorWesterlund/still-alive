@@ -1,0 +1,33 @@
+html,
+body {
+	--padding: 40px;
+	display: initial;
+	overflow: hidden;
+	padding: var(--padding);
+	box-sizing: border-box;
+}
+
+#player {
+	position: absolute;
+	bottom: var(--padding);
+}
+
+#player pre,
+#player p {
+	font-size: 16px;
+	color: rgb(var(--color-accent));
+}
+
+#player p {
+	margin: 0;
+    height: 23px;
+}
+
+#player p:last-child::after {
+	content: "_";
+	animation: blink 500ms alternate infinite;
+}
+
+@keyframes blink {
+	to { opacity: 0; }
+}

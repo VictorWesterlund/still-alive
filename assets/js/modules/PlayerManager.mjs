@@ -2,8 +2,9 @@ import { default as PlayerWindow } from "./PlayerWindow.mjs";
 import { default as Monkeydo } from "./monkeydo/Monkeydo.mjs";
 
 export default class WindowManager {
-	constructor() {
+	constructor(mediaElement) {
 		const self = this;
+		this.mediaElement = mediaElement;
 
 		// Bi-directional communcation to player windows
 		this.channels = {
@@ -12,9 +13,12 @@ export default class WindowManager {
 			"#art": new BroadcastChannel("#art")
 		};
 
+		for(const channel of Object.values(this.channels)) {
+			channel.addEventListener("message",event => this.message(event));
+		}
+
 		// Monkeydo methods
 		const methods = {
-			self: self,
 			blank: (target) => {
 				self.channels[target].postMessage(["BLANK",target]);
 			},
@@ -26,11 +30,16 @@ export default class WindowManager {
 			},
 			drawArt: (index,target = "#art") => {
 				self.channels[target].postMessage(["DRAW_ART",index]);
+			},
+			playCredits: () => {
+				self.players.credits.do();
 			}
 		}
 
-		this.player = new Monkeydo(methods);
-		this.player.loop(-1);
+		this.players = {
+			lyrics: new Monkeydo(methods),
+			credits: new Monkeydo(methods)
+		}
 	}
 
 	playbackFailed(promiseObject = false) {
@@ -62,8 +71,18 @@ export default class WindowManager {
 		});
 	}
 
-	// Open player windows and start playback
 	async play() {
+		for(const [key,player] of Object.entries(this.players)) {
+			const manifest = new URL(window.location.href + `monkeydo_${key}.json`);
+
+			await player.load(manifest.toString());
+		}
+		this.players.lyrics.do();
+		this.mediaElement.play();
+	}
+
+	// Open player windows and start playback
+	async init() {
 		const art = this.spawnPlayer("#art");
 		const credits = this.spawnPlayer("#credits");
 		const lyrics = this.spawnPlayer("#lyrics");
@@ -81,8 +100,18 @@ export default class WindowManager {
 			});
 
 			// Load Monkeydo manifest and start playback
-			const manifest = new URL(window.location.href + "monkeydo.json");
-			this.player.load(manifest.toString()).then(() => this.player.do());
+			this.play();
 		});
+	}
+
+	message(event) {
+		const type = event.data[0];
+		const data = event.data[1];
+		console.log(event);
+
+		switch(type) {
+			case "PLAY": console.log("PLAY",event); break;
+			case "WINDOW_CLOSED": console.log("WINDOW_CLOSED",event); break;
+		}
 	}
 }

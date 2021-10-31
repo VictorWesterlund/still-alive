@@ -9,13 +9,26 @@ body {
 
 #player {
 	position: absolute;
+}
+
+body.credits #player {
 	bottom: var(--padding);
+}
+
+body.art {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 #player pre,
 #player p {
 	font-size: 16px;
 	color: rgb(var(--color-accent));
+}
+
+body.art #player pre {
+	font-size: clamp(0px,3vw,3vh);
 }
 
 #player p {

@@ -51,7 +51,6 @@ export default class StillAlivePlayer {
 	message(event) {
 		const type = event.data[0];
 		const data = event.data[1];
-		console.log(event);
 
 		switch(type) {
 			case "LINE_FEED": this.lineFeed(); break;

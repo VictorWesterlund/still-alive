@@ -107,7 +107,6 @@ export default class WindowManager {
 	message(event) {
 		const type = event.data[0];
 		const data = event.data[1];
-		console.log(event);
 
 		switch(type) {
 			case "PLAY": console.log("PLAY",event); break;

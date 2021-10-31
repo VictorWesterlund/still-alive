@@ -1,6 +1,3 @@
-[submodule "monkeydo"]
-		path = assets/js/modules/monkeydo
-		url = https://github.com/VictorWesterlund/monkeydo.git
 [submodule "assets/js/modules/monkeydo"]
 	path = assets/js/modules/monkeydo
 	url = https://github.com/VictorWesterlund/monkeydo.git

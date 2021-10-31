@@ -1,0 +1,46 @@
+html,
+body {
+	--padding: 40px;
+	display: initial;
+	overflow: hidden;
+	padding: var(--padding);
+	box-sizing: border-box;
+}
+
+#player {
+	position: absolute;
+}
+
+body.credits #player {
+	bottom: var(--padding);
+}
+
+body.art {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#player pre,
+#player p {
+	font-size: 16px;
+	color: rgb(var(--color-accent));
+}
+
+body.art #player pre {
+	font-size: clamp(0px,3vw,3vh);
+}
+
+#player p {
+	margin: 0;
+    height: 23px;
+}
+
+#player p:last-child::after {
+	content: "_";
+	animation: blink 500ms alternate infinite;
+}
+
+@keyframes blink {
+	to { opacity: 0; }
+}

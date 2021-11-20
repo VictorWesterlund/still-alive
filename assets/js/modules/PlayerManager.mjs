@@ -32,7 +32,7 @@ export default class WindowManager {
 				self.channels[target].postMessage(["DRAW_ART",index]);
 			},
 			playCredits: () => {
-				self.players.credits.do();
+				self.players.credits.play();
 			}
 		}
 
@@ -77,7 +77,7 @@ export default class WindowManager {
 
 			await player.load(manifest.toString());
 		}
-		this.players.lyrics.do();
+		this.players.lyrics.play();
 		this.mediaElement.play();
 	}
 

@@ -1,17 +1,17 @@
 const windowPositions = {
-	"#lyrics": {
+	"lyrics": {
 		width: window.innerWidth / 2,
 		height: window.innerHeight,
 		top: 0,
 		left: 0
 	},
-	"#credits": {
+	"credits": {
 		width: window.innerWidth / 2,
 		height: window.innerHeight / 2,
 		top: 0,
 		left: window.innerWidth / 2
 	},
-	"#art": {
+	"art": {
 		width: window.innerWidth / 2,
 		height: window.innerHeight / 2,
 		top: window.innerHeight / 2,
@@ -20,7 +20,7 @@ const windowPositions = {
 }
 
 export default class PlayerWindow {
-	constructor(name) {
+	constructor(name,manifest = null) {
 		this.features = {
 			menubar: false,
 			location: false,
@@ -28,16 +28,20 @@ export default class PlayerWindow {
 			scrollbar: false,
 			status: false
 		}
+		this.name = name;
+		this.window = null;
 
 		this.url = new URL(window.location.href + "player");
 		this.url.hash = name;
+
+		if(manifest) this.url.searchParams.append("manifest",manifest);
 
 		// Copy window size rect into windowFeatures
 		Object.assign(this.features,windowPositions[this.url.hash]);
 	}
 
 	// Convert windowFeatures object into a CSV DOMString
-	windowFeatures() {
+	getWindowFeatures() {
 		let output = [];
 		for(let [key,value] of Object.entries(this.features)) {
 			if(typeof key === "boolean") {
@@ -48,14 +52,12 @@ export default class PlayerWindow {
 		return output.join(",");
 	}
 
+	// Compile windowFeatures and open the window
 	open() {
-		const features = this.windowFeatures();
-		const open = window.open(this.url.toString(),this.url.hash,features);
+		const features = this.getWindowFeatures();
+		this.window = window.open(this.url.toString(),this.name,features);
 
-		// Window failed to open (usually due to pop-up blocking), tell the WindowManager about this
-		if(!open) {
-			const channel = new BroadcastChannel(this.url.hash);
-			channel.postMessage(["WINDOW_ERROR",[this.url.hash,"BLOCKED"]]);
-		}
+		// Will return null if window failed to open (usually due to popup blocking)
+		return this.window;
 	}
 }

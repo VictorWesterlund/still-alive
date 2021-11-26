@@ -1,4 +1,6 @@
-// Encoded in order from: https://blog.kazitor.com/2014/12/portal-ascii/
+import { default as Monkeydo } from "./monkeydo/Monkeydo.mjs";
+
+// URIEncoded ASCII art
 const artset = [
 	"%20%20%20%20%20%20%20%20%20%20%20%20%20.%2C-%3A%3B%2F%2F%3B%3A%3D%2C%0A%20%20%20%20%20%20%20%20%20.%20%3AH%40%40%40MM%40M%23H%2F.%2C%2B%25%3B%2C%0A%20%20%20%20%20%20%2C%2FX%2B%20%2BM%40%40M%40MM%25%3D%2C-%25HMMM%40X%2F%2C%0A%20%20%20%20%20-%2B%40MM%3B%20%24M%40%40MH%2B-%2C%3BXMMMM%40MMMM%40%2B-%0A%20%20%20%20%3B%40M%40%40M-%20XM%40X%3B.%20-%2BXXXXXHHH%40M%40M%23%40%2F.%0A%20%20%2C%25MM%40%40MH%20%2C%40%25%3D%20%20%20%20%20%20%20%20%20%20%20%20.---%3D-%3D%3A%3D%2C.%0A%20%20-%40%23%40%40%40MX%20.%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20-%25HX%24%24%25%25%25%2B%3B%0A%20%3D-.%2F%40M%40M%24%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20.%3B%40MMMM%40MM%3A%0A%20X%40%2F%20-%24MM%2F%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20.%2BMM%40%40%40M%24%0A%2C%40M%40H%3A%20%3A%40%3A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20.%20-X%23%40%40%40%40-%0A%2C%40%40%40MMX%2C%20.%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2FH-%20%3B%40M%40M%3D%0A.H%40%40%40%40M%40%2B%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%25MM%2B..%25%23%24.%0A%20%2FMMMM%40MMH%2F.%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20XM%40MH%3B%20-%3B%0A%20%20%2F%25%2B%25%24XHH%40%24%3D%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20.H%40%40%40%40MX%2C%0A%20%20%20.%3D--------.%20%20%20%20%20%20%20%20%20%20%20-%25H.%2C%40%40%40%40%40MX%2C%0A%20%20%20.%25MM%40%40%40HHHXX%24%24%24%25%2B-%20.%3A%24MMX%20-M%40%40MM%25.%0A%20%20%20%20%20%3DXMMM%40MM%40MM%23H%3B%2C-%2BHMM%40M%2B%20%2FMMMX%3D%0A%20%20%20%20%20%20%20%3D%25%40M%40M%23%40%24-.%3D%24%40MM%40%40%40M%3B%20%25M%25%3D%0A%20%20%20%20%20%20%20%20%20%2C%3A%2B%24%2B-%2C%2FH%23MMMMMMM%40-%20-%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3D%2B%2B%25%25%25%25%2B%2F%3A-.",
 	"%20%20%20%20%20%20%20%20%20%20%20%20%20%3D%2B%24HM%23%23%23%23%40H%25%3B%2C%0A%20%20%20%20%20%20%20%20%20%20%2FH%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23M%24%2C%0A%20%20%20%20%20%20%20%20%20%20%2C%40%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%23%2B%0A%20%20%20%20%20%20%20%20%20%20%20.H%23%23%23%23%23%23%23%23%23%23%23%23%23%23%2B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20X%23%23%23%23%23%23%23%23%23%23%23%23%2F%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%24%23%23%23%23%23%23%23%23%23%23%2F%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%25%23%23%23%23%23%23%23%23%2F%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2FX%2F%3B%3B%2BX%2F%0A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20-XHHX-%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%23%23%23%23%23%23%2C%0A%23%23%23%23%23%23%23%23%23%23%23%23%23X%20%20.M%23%23%23%23M.%20%20X%23%23%23%23%23%23%23%23%23%23%23%23%23%0A%23%23%23%23%23%23%23%23%23%23%23%23%23%23-%20%20%20-%2F%2F-%20%20%20-%23%23%23%23%23%23%23%23%23%23%23%23%23%23%0AX%23%23%23%23%23%23%23%23%23%23%23%23%23%23%25%2C%20%20%20%20%20%20%2C%2B%23%23%23%23%23%23%23%23%23%23%23%23%23%23X%0A-%23%23%23%23%23%23%23%23%23%23%23%23%23%23X%20%20%20%20%20%20%20%20X%23%23%23%23%23%23%23%23%23%23%23%23%23%23-%0A%20%25%23%23%23%23%23%23%23%23%23%23%23%23%25%20%20%20%20%20%20%20%20%20%20%25%23%23%23%23%23%23%23%23%23%23%23%23%25%0A%20%20%25%23%23%23%23%23%23%23%23%23%23%3B%20%20%20%20%20%20%20%20%20%20%20%20%3B%23%23%23%23%23%23%23%23%23%23%25%0A%20%20%20%3B%23%23%23%23%23%23%23M%3D%20%20%20%20%20%20%20%20%20%20%20%20%20%20%3DM%23%23%23%23%23%23%23%3B%0A%20%20%20%20.%2BM%23%23%23%40%2C%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%40%23%23%23M%2B.%0A%20%20%20%20%20%20%20%3AXH.%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20.HX%3A",
@@ -13,39 +15,70 @@ const artset = [
 ];
 
 export default class StillAlivePlayer {
-	constructor(element) {
-		this.channel = new BroadcastChannel(window.location.hash);
+	constructor(element,name) {
+		const self = this;
+		
+		this.name = name;
+
+		// Open a BroadcastChannel to listen to messages for me
+		this.channel = new BroadcastChannel(this.name);
 		this.channel.addEventListener("message",event => this.message(event));
 
-		this.player = element;
-
-		this.channel.postMessage(["WINDOW_READY",window.location.hash]);
-	}
-
-	// Clear the screen from elements
-	blank() {
-		while(this.player.firstChild) {
-			this.player.removeChild(this.player.lastChild);
+		// Monkeydo methods
+		const methods = {
+			// Clear the screen from elements
+			blank: () => {
+				while(this.player.firstChild) {
+					this.player.removeChild(this.player.lastChild);
+				}
+			},
+			// Create a new paragraph and make it the target for textFeed calls
+			lineFeed: () => {
+				this.target = document.createElement("p");
+				this.player.appendChild(this.target);
+			},
+			// Append text to the current target element
+			textFeed: (text) => {
+				this.target.innerText = this.target.innerText + text;
+			},
+			// Decode and draw art from artset by key
+			drawArt: (index) => {
+				this.blank();
+				self.target = document.createElement("pre");
+				self.target.innerText = window.decodeURIComponent(artset[key]);
+				self.player.appendChild(self.target);
+			},
+			playCredits: () => {
+				self.players.credits.play();
+			}
 		}
+
+		// Execute or relay Monkeydo methods
+		const proxiedMethods = this.getMethods(methods);
+
+		console.log(proxiedMethods.lineFeed("lyrics"));
+		this.player = element;
 	}
 
-	// Create a new paragraph and make it the target for textFeed calls
-	lineFeed() {
-		this.target = document.createElement("p");
-		this.player.appendChild(this.target);
+	getMethods(methods) {
+		const handler = {
+			get(target,propKey,receiver) {
+				const origMethod = target[propKey];
+				return function (...args) {
+					console.log(this);
+					let result = origMethod.apply(this, args);
+					return result;
+				};
+			}
+		};
+		return new Proxy(methods,handler);
 	}
 
-	// Append text to the current target element
-	textFeed(text) {
-		this.target.innerText = this.target.innerText + text;
-	}
-
-	// Decode and draw art from artset by key
-	drawArt(key) {
-		this.blank();
-		this.target = document.createElement("pre");
-		this.target.innerText = window.decodeURIComponent(artset[key]);
-		this.player.appendChild(this.target);
+	// Open a channel to a different player to relay a task
+	relay(channelName,message) {
+		const channel = new BroadcastChannel(channelName);
+		channel.postMessage(message);
+		channel.close();
 	}
 
 	message(event) {

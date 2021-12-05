@@ -11,4 +11,7 @@ const name = window.location.hash.substring(1);
 document.body.className = name;
 
 const target = document.getElementById("player");
-new Player(target,name);
+const player = new Player(target,name);
+
+// Notify PlayerManager that I was closed
+window.addEventListener("beforeunload",() => player.channel.postMessage("PLAYER_CLOSED"));

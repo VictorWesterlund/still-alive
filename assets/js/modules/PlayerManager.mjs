@@ -3,9 +3,9 @@ import { default as Player } from "./PlayerWindow.mjs";
 export default class PlayerManager {
 	constructor() {
 		this.players = {
-			"lyrics": new Player("lyrics","monkeydo_lyrics.json")//,
-			//"credits": new Player("credits","monkeydo_credits.json"),
-			//"art": new Player("art")
+			"lyrics": new Player("lyrics","monkeydo_lyrics.json"),
+			"credits": new Player("credits","monkeydo_credits.json"),
+			"art": new Player("art")
 		};
 
 		this.channels = new WeakMap();
@@ -20,16 +20,20 @@ export default class PlayerManager {
 		}
 	}
 
+	// Close all opened windows (some browsers allow one window to open)
+	closeAll() {
+		for(const player of Object.values(this.players)) {
+			player.window?.close();
+		}
+	}
+
 	// Window blocked from opening, show "allow popups" message
 	windowOpenFailed() {
-		// Close all opened windows (some browsers allow one window to open)
-		//for(const player of Object.values(this.players)) {
-		//	player.window?.close();
-		//}
-		console.log("failed to open a window");
+		this.closeAll();
+		throw new Error("WINDOW_OPEN_FAILED");
 	}
 
 	message(event) {
-		console.log(event);
+		if(event.data === "PLAYER_CLOSED") return this.closeAll();
 	}
 }

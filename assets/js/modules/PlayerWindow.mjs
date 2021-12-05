@@ -34,22 +34,29 @@ export default class PlayerWindow {
 		this.url = new URL(window.location.href + "player");
 		this.url.hash = name;
 
+		// Path to Monkeydo manifest to load in this window
 		if(manifest) this.url.searchParams.append("manifest",manifest);
 
 		// Copy window size rect into windowFeatures
-		Object.assign(this.features,windowPositions[this.url.hash]);
+		Object.assign(this.features,windowPositions[name]);
 	}
 
 	// Convert windowFeatures object into a CSV DOMString
 	getWindowFeatures() {
 		let output = [];
 		for(let [key,value] of Object.entries(this.features)) {
+			// Coercive boolean
 			if(typeof key === "boolean") {
 				value = value ? "yes" : "no";
 			}
 			output.push(`${key}=${value}`);
 		}
 		return output.join(",");
+	}
+
+	// Close this window
+	close() {
+		return this.window?.close() ?? false;
 	}
 
 	// Compile windowFeatures and open the window

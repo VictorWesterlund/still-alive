@@ -19,6 +19,7 @@ export default class StillAlivePlayer {
 		const self = this;
 		
 		this.name = name;
+		this.player = element;
 
 		// Open a BroadcastChannel to listen to messages for me
 		this.channel = new BroadcastChannel(this.name);
@@ -28,45 +29,98 @@ export default class StillAlivePlayer {
 		const methods = {
 			// Clear the screen from elements
 			blank: () => {
-				while(this.player.firstChild) {
-					this.player.removeChild(this.player.lastChild);
+				while(self.firstChild) {
+					self.removeChild(self.lastChild);
 				}
 			},
 			// Create a new paragraph and make it the target for textFeed calls
 			lineFeed: () => {
-				this.target = document.createElement("p");
-				this.player.appendChild(this.target);
+				self.target = document.createElement("p");
+				self.player.appendChild(self.target);
 			},
 			// Append text to the current target element
 			textFeed: (text) => {
-				this.target.innerText = this.target.innerText + text;
+				self.target.innerText = self.target.innerText + text;
 			},
-			// Decode and draw art from artset by key
-			drawArt: (index) => {
+			// Decode and draw art from artset by index key
+			drawArt: (idx) => {
 				this.blank();
 				self.target = document.createElement("pre");
-				self.target.innerText = window.decodeURIComponent(artset[key]);
+				self.target.innerText = window.decodeURIComponent(artset[idx]);
 				self.player.appendChild(self.target);
 			},
-			playCredits: () => {
-				self.players.credits.play();
+			play: () => {
+				if(!self.monkey) return console.warn("This player has no manifest loaded");
+				self.monkey.play();
 			}
 		}
-
+		
 		// Execute or relay Monkeydo methods
 		const proxiedMethods = this.getMethods(methods);
 
-		console.log(proxiedMethods.lineFeed("lyrics"));
-		this.player = element;
+		// Monkeydo
+		const manifest = this.getManifest();
+		if(manifest) {
+			this.monkey = new Monkeydo(proxiedMethods);
+			this.monkey.load(manifest).then(() => {
+				// Start playback of the first manifest
+				if(this.name === "lyrics") this.host();
+			});
+		}
+	}
+
+	// Get parent directory of this file
+	getParentURL() {
+		let pathname = window.location.pathname.split("/");
+		pathname.pop();
+		pathname = pathname[pathname.length - 1];
+		return pathname;
+	}
+
+	// This player is the "host", it will play the music and send events to other players
+	host() {
+		const parent = this.getParentURL();
+		const pathname = [parent,"assets","media","still-alive.webm"].join("/");
+
+		const musicURL = new URL(window.location.origin);
+		musicURL.pathname = pathname;
+
+		// Load and play the Still Alive when ready
+		const stillalive = new Audio(musicURL.toString());
+		stillalive.addEventListener("canplaythrough",() => {
+			this.monkey.play(); // Start the visuals
+			stillalive.play(); // Start the music
+		},{ once: true });
+	}
+
+	getManifest() {
+		const searchParams = new URLSearchParams(window.location.search);
+		if(!searchParams.has("manifest")) return false;
+		
+		// Relative pathname to manifest JSON
+		const parent = this.getParentURL();
+		const pathname = [parent,searchParams.get("manifest")].join("/");
+		
+		// Create a URL to the manifest
+		const manifest = new URL(window.location.origin);
+		manifest.pathname = pathname;
+		
+		return manifest.toString();
 	}
 
 	getMethods(methods) {
 		const handler = {
+			name: this.name,
+			relay: (...args) => this.relay(...args),
+			// Get and call methods from object
 			get(target,propKey,receiver) {
 				const origMethod = target[propKey];
 				return function (...args) {
-					console.log(this);
-					let result = origMethod.apply(this, args);
+					// Relay function call if it's not for me
+					const channel = args[args.length - 1] ?? null;
+					if(channel && channel !== handler.name) return handler.relay(args);
+					
+					let result = origMethod.apply(this,args);
 					return result;
 				};
 			}
@@ -74,7 +128,7 @@ export default class StillAlivePlayer {
 		return new Proxy(methods,handler);
 	}
 
-	// Open a channel to a different player to relay a task
+	// Open a channel to a different player to forward a task
 	relay(channelName,message) {
 		const channel = new BroadcastChannel(channelName);
 		channel.postMessage(message);
